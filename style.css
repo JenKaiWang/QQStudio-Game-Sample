@@ -1,0 +1,83 @@
+/* Mobile-first styles for Ramen Dash */
+:root{
+  --primary:#d94f30;
+  --bg:#fff3df;
+  --obstacle:#7a3e1d;
+  --player:#ffcc66;
+  --text:#3a2a22;
+}
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  -webkit-tap-highlight-color: transparent;
+}
+#game-container{
+  position:relative;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+canvas{
+  background: linear-gradient(180deg, rgba(255,243,222,1) 0%, rgba(253,238,224,1) 100%);
+  border-radius:12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  touch-action: manipulation;
+}
+#top-ui{
+  position:absolute;
+  top:12px;
+  left:12px;
+  right:12px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  z-index:20;
+  pointer-events:none;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+}
+#top-ui > div{ background: rgba(255,255,255,0.6); padding:6px 10px; border-radius:8px; font-size:14px;}
+.overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:30;
+  padding:20px;
+  box-sizing:border-box;
+}
+.overlay.hidden{ display:none; }
+#startScreen h1{ font-size:34px; margin:4px 0; color:var(--primary);} 
+#startScreen p{ margin:6px 0 12px; text-align:center; }
+#coupon-list{ max-width:320px; text-align:left; background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;}
+.big-btn{
+  background:var(--primary);
+  color:white;
+  border:none;
+  padding:14px 20px;
+  font-size:18px;
+  border-radius:12px;
+  margin-top:12px;
+  width:220px;
+  max-width:80%;
+}
+.actions{ display:flex; gap:12px; margin-top:12px; }
+#couponModal #couponCard{ background:white; padding:16px; border-radius:12px; text-align:center; max-width:360px; box-shadow:0 6px 20px rgba(0,0,0,0.2);}
+
+/* Responsive: make canvas occupy reasonable portrait area */
+@media (orientation:portrait){
+  canvas{ width:calc(min(420px, 95vw)); height: calc((min(420px, 95vw) * (16/9))); }
+}
+@media (orientation:landscape){
+  canvas{ width:calc(min(640px, 70vw)); height: calc((min(640px, 70vw) * (9/16))); }
+}
+
+/* Ensure no body scroll while playing */
+body.playing { overflow:hidden; }

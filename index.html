@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Ramen Dash</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="gameCanvas" aria-label="Ramen Dash game canvas"></canvas>
+
+    <div id="top-ui">
+      <div id="time">Time: 0.0s</div>
+      <div id="reward">Current Reward: None</div>
+      <div id="next">Next: Free appetizer at 10s</div>
+    </div>
+
+    <div id="startScreen" class="overlay">
+      <h1 id="title">Ramen Dash</h1>
+      <p id="subtitle">Survive longer to unlock ramen coupons!</p>
+
+      <div id="coupon-list">
+        <strong>Coupon Rewards:</strong>
+        <ul>
+          <li>10s - Free appetizer</li>
+          <li>20s - Free drink</li>
+          <li>30s - 10% off ramen</li>
+          <li>45s - Free ramen topping</li>
+          <li>60s - Buy one ramen, get one half off</li>
+        </ul>
+      </div>
+
+      <button id="startBtn" class="big-btn">Start Game</button>
+    </div>
+
+    <div id="gameOverScreen" class="overlay hidden">
+      <h2>Game Over</h2>
+      <p id="survivedText">You survived: 0.0s</p>
+      <p id="finalCouponLabel">Your coupon:</p>
+      <p id="finalCoupon">No coupon unlocked</p>
+
+      <div class="actions">
+        <button id="claimBtn" class="big-btn">Claim Coupon</button>
+        <button id="playAgainBtn" class="big-btn">Play Again</button>
+      </div>
+    </div>
+
+    <div id="couponModal" class="overlay hidden">
+      <div id="couponCard">
+        <h3>Congratulations!</h3>
+        <p id="couponText">You won: Free drink</p>
+        <p id="couponCode">Coupon Code: RAMEN-DRINK-2026</p>
+        <p id="couponExpiry">Expires: June 30, 2026</p>
+        <div class="actions">
+          <button id="backBtn" class="big-btn">Back</button>
+          <button id="playAgainBtn2" class="big-btn">Play Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
