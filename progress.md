@@ -67,3 +67,24 @@ Updated game code:
 - Obstacle images now render instead of rectangles
 - Player image loads with transparent background support
 - Images fall back to placeholders if files not found
+
+## Obstacle Rendering Fix (v3 - Current)
+
+- Date: 2026-06-02
+- **Fixed obstacle distortion**: Obstacles now use proper aspect ratio scaling instead of stretching
+- **Preserved image quality**: Top and bottom obstacles drawn at natural proportions
+- **Improved positioning**: Top obstacle hangs from top, bottom rises from bottom with gap between
+- **Collision detection updated**: Uses actual drawn obstacle dimensions
+
+**Important: Process obstacle images to remove white background:**
+1. Open `process-assets.html` in your browser
+2. For obstacle-top.png:
+   - Select `assets/obstacle-top.png` 
+   - Treat it like the "player" process - remove white background to make transparent
+   - You may need to process it manually or use an image editor
+3. For obstacle-bottom.png:
+   - Same as above - process to remove white background
+4. Save the transparent versions back to assets
+5. Refresh the game to see clean obstacles without white background
+
+If you don't have an image editor handy, please let me know and I can provide a more advanced asset processor tool.

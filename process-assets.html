@@ -48,11 +48,28 @@
   </div>
 
   <div class="section">
+    <h2>3. Clean Obstacle Images (Remove White Background)</h2>
+    <div class="info">Removes white background from obstacle-top.png and obstacle-bottom.png, keeping only the steam obstacle artwork.</div>
+    <p>Use this for each obstacle image file:</p>
+    <input type="file" id="obstacleCleanInput" accept="image/*" />
+    <button onclick="processObstacleClean()">Remove White Background from Obstacle</button>
+    <br />
+    <canvas id="obstacleCleanCanvas"></canvas>
+    <button onclick="downloadCanvas('obstacleCleanCanvas', 'obstacle-cleaned.png')" id="downloadCleanBtn" style="display:none;">Download obstacle-cleaned.png</button>
+  </div>
+
+  <div class="section">
     <h3>Instructions:</h3>
     <ol>
       <li>For <strong>Player</strong>: Select player.png → Click "Process Player" → Download the result and save to <code>assets/player.png</code></li>
       <li>For <strong>Obstacle</strong>: Select obstacle.png → Click "Split Obstacle" → Download both images to <code>assets/obstacle-top.png</code> and <code>assets/obstacle-bottom.png</code></li>
-      <li>Refresh your game page. New assets will load automatically.</li>
+      <li>For <strong>Obstacle Images</strong>: For each obstacle image (top and bottom), use "Remove White Background" tool:
+        <ul>
+          <li>Select <code>assets/obstacle-top.png</code> → Click "Remove White Background from Obstacle" → Download and save back to <code>assets/obstacle-top.png</code></li>
+          <li>Repeat for <code>assets/obstacle-bottom.png</code></li>
+        </ul>
+      </li>
+      <li>Refresh your game page. New assets will load automatically with proper rendering and no white backgrounds.</li>
     </ol>
   </div>
 
@@ -133,6 +150,43 @@
       link.href = canvas.toDataURL('image/png');
       link.download = filename;
       link.click();
+    }
+
+    function processObstacleClean() {
+      const input = document.getElementById('obstacleCleanInput');
+      if (!input.files[0]) { alert('Please select an obstacle image'); return; }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.getElementById('obstacleCleanCanvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          
+          // Remove white background: convert near-white pixels to transparent
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+          
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i+1];
+            const b = data[i+2];
+            const a = data[i+3];
+            
+            // If pixel is very light (close to white), make it transparent
+            const brightness = (r + g + b) / 3;
+            if (brightness > 240 && a > 200) {
+              data[i+3] = 0; // set alpha to transparent
+            }
+          }
+          ctx.putImageData(imageData, 0, 0);
+          document.getElementById('downloadCleanBtn').style.display = 'inline-block';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
     }
   </script>
 </body>

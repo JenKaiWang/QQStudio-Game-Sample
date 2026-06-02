@@ -284,18 +284,32 @@ function drawGame(){
 
   // draw obstacles: use images if available, otherwise rectangles
   for(const ob of obstacles){
-    if(imagesReady && obstacleTopImg && obstacleTopImg.complete && obstacleTopImg.naturalWidth){
-      // draw top obstacle image
-      ctx.drawImage(obstacleTopImg, ob.x, 0, ob.width, ob.topHeight);
-      // draw bottom obstacle image (flipped)
-      const bottomY = ob.topHeight + ob.gap;
-      const bottomH = ch - bottomY - 24;
-      ctx.drawImage(obstacleBottomImg, ob.x, bottomY, ob.width, bottomH);
+    if(imagesReady && obstacleTopImg && obstacleTopImg.complete && obstacleTopImg.naturalWidth && obstacleBottomImg && obstacleBottomImg.complete && obstacleBottomImg.naturalWidth){
+      // Calculate proportional scaling based on obstacle width and image aspect ratio
+      const topAspect = obstacleTopImg.naturalHeight / obstacleTopImg.naturalWidth;
+      const bottomAspect = obstacleBottomImg.naturalHeight / obstacleBottomImg.naturalWidth;
+      
+      const drawnTopHeight = Math.round(ob.width * topAspect);
+      const drawnBottomHeight = Math.round(ob.width * bottomAspect);
+      
+      // Store for collision detection
+      ob.drawnTopHeight = drawnTopHeight;
+      ob.drawnBottomHeight = drawnBottomHeight;
+      
+      // Draw top obstacle: positioned to hang down from the gap start
+      const topObstacleY = Math.max(0, ob.topGapStart - drawnTopHeight);
+      ctx.drawImage(obstacleTopImg, ob.x, topObstacleY, ob.width, drawnTopHeight);
+      
+      // Draw bottom obstacle: positioned to rise up from the gap start + gap
+      const bottomObstacleY = ob.topGapStart + ob.gap;
+      ctx.drawImage(obstacleBottomImg, ob.x, bottomObstacleY, ob.width, drawnBottomHeight);
     } else {
-      // fallback to rectangles
+      // fallback to simple rectangles if images not loaded
       ctx.fillStyle = clientConfig.theme.obstacleColor;
-      ctx.fillRect(ob.x, 0, ob.width, ob.topHeight);
-      ctx.fillRect(ob.x, ob.topHeight + ob.gap, ob.width, ch - (ob.topHeight + ob.gap) - 24);
+      // top obstacle
+      ctx.fillRect(ob.x, 0, ob.width, ob.topGapStart);
+      // bottom obstacle
+      ctx.fillRect(ob.x, ob.topGapStart + ob.gap, ob.width, ch - (ob.topGapStart + ob.gap) - 24);
     }
   }
 
@@ -328,19 +342,36 @@ function jump(){
 }
 
 function spawnObstacle(){
-  const width = 56;
+  // Fixed width for obstacles (in pixels)
+  const obstacleWidth = 70;
   const minGap = Math.max(90, Math.round(160 - elapsedTime*1.2));
   const maxGap = Math.max(minGap, minGap + 40);
   const gap = Math.round(minGap + Math.random()*(maxGap-minGap));
-  const topMin = 40;
-  const topMax = ch - gap - 120;
-  const topHeight = Math.round(topMin + Math.random()*(Math.max(topMin, topMax)-topMin));
-  obstacles.push({ x: cw + 40, width, topHeight, gap, speed });
+  
+  // Random vertical position for the gap
+  const topMin = 60;
+  const topMax = ch - gap - 140;
+  const topGapStart = Math.round(topMin + Math.random()*(Math.max(topMin, topMax)-topMin));
+  
+  obstacles.push({ 
+    x: cw + 40, 
+    width: obstacleWidth, 
+    topGapStart, // where the gap starts (bottom of top obstacle)
+    gap, 
+    speed,
+    drawnTopHeight: null, // will be calculated during draw
+    drawnBottomHeight: null
+  });
 }
 
 function checkCollision(circle, rect){
-  // check collision with top rect
-  const rects = [ {x:rect.x, y:0, w:rect.width, h:rect.topHeight}, {x:rect.x, y:rect.topHeight+rect.gap, w:rect.width, h: ch - (rect.topHeight+rect.gap) - 24}];
+  // check collision with top and bottom obstacles using actual drawn dimensions
+  const rects = [
+    // top obstacle: from y=0 down to topGapStart (where gap starts)
+    { x: rect.x, y: Math.max(0, rect.topGapStart - rect.drawnTopHeight), w: rect.width, h: Math.max(0, rect.topGapStart) },
+    // bottom obstacle: from (topGapStart + gap) down to ground
+    { x: rect.x, y: rect.topGapStart + rect.gap, w: rect.width, h: rect.drawnBottomHeight }
+  ];
   for(const r of rects){
     const closestX = clamp(circle.x, r.x, r.x + r.w);
     const closestY = clamp(circle.y, r.y, r.y + r.h);
