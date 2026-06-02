@@ -41,3 +41,11 @@ python -m http.server 8000
 - [ ] Test on multiple mobile devices and tune difficulty
 - [ ] Optionally add themed graphics and sounds
 - [ ] Push prototype to GitHub (completed now)
+ - [ ] Add assets: place background and player images in `assets/` folder
+
+Asset filenames expected (place in project root `assets/`):
+
+- `assets/bg.jpg`  — background ramen shop image (suggested: provided attachment)
+- `assets/player.png` — ramen bowl character (suggested: provided attachment)
+
+After adding images, reload the page. The game will use the images automatically and fall back to placeholders if images are missing.

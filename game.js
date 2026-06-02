@@ -24,6 +24,11 @@ let canvas, ctx;
 let cw = 360, ch = 640; // default portrait area (will be resized)
 let DPR = window.devicePixelRatio || 1;
 
+// Images (optional): place images at `assets/bg.jpg` and `assets/player.png`
+let bgImg = null;
+let playerImg = null;
+let imagesReady = false;
+
 // Game state
 const STATE = { START: 'start', PLAYING: 'playing', GAMEOVER: 'gameOver', COUPON: 'coupon' };
 let gameState = STATE.START;
@@ -81,6 +86,9 @@ function initGame(){
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
+  // start loading images (if present)
+  loadImages();
+
   // Show start content from config
   q('title').textContent = clientConfig.gameTitle;
   q('subtitle').textContent = clientConfig.subtitle;
@@ -89,6 +97,23 @@ function initGame(){
   // Start animation loop but only update when playing
   lastTime = performance.now();
   requestAnimationFrame(loop);
+}
+
+function loadImages(){
+  imagesReady = false;
+  bgImg = new Image();
+  playerImg = new Image();
+  let toLoad = 2;
+  const checkLoaded = ()=>{ if(--toLoad <= 0) imagesReady = true; };
+
+  // Try to load background and player. If not found, images will error but game will still run.
+  bgImg.src = 'assets/bg.jpg';
+  bgImg.onload = checkLoaded;
+  bgImg.onerror = ()=>{ console.info('bg image not found at assets/bg.jpg — using placeholder'); checkLoaded(); };
+
+  playerImg.src = 'assets/player.png';
+  playerImg.onload = checkLoaded;
+  playerImg.onerror = ()=>{ console.info('player image not found at assets/player.png — using placeholder'); checkLoaded(); };
 }
 
 function resizeCanvas(){
@@ -211,9 +236,19 @@ function updateGame(dt){
 function drawGame(){
   // clear
   ctx.clearRect(0,0,cw,ch);
-  // background
-  ctx.fillStyle = clientConfig.theme.backgroundColor;
-  ctx.fillRect(0,0,cw,ch);
+  // background: image if available, otherwise solid color
+  if(imagesReady && bgImg && bgImg.complete && bgImg.naturalWidth){
+    // draw background to cover canvas while preserving aspect
+    const iw = bgImg.naturalWidth, ih = bgImg.naturalHeight;
+    const scale = Math.max(cw / iw, ch / ih);
+    const iwScaled = iw * scale, ihScaled = ih * scale;
+    const dx = (cw - iwScaled) / 2;
+    const dy = (ch - ihScaled) / 2;
+    ctx.drawImage(bgImg, dx, dy, iwScaled, ihScaled);
+  } else {
+    ctx.fillStyle = clientConfig.theme.backgroundColor;
+    ctx.fillRect(0,0,cw,ch);
+  }
 
   // ground
   ctx.fillStyle = '#e6c8b0';
@@ -226,23 +261,28 @@ function drawGame(){
     ctx.fillRect(ob.x, ob.topHeight + ob.gap, ob.width, ch - (ob.topHeight + ob.gap) - 24);
   }
 
-  // draw player (rounded bowl placeholder)
-  ctx.fillStyle = clientConfig.theme.playerColor;
-  ctx.beginPath();
-  ctx.arc(player.x, player.y, player.r, 0, Math.PI*2);
-  ctx.fill();
-  // a simple noodle arc
-  ctx.strokeStyle = '#d99a3b';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(player.x - player.r/1.5, player.y - player.r/4);
-  ctx.quadraticCurveTo(player.x, player.y - player.r, player.x + player.r/1.5, player.y - player.r/6);
-  ctx.stroke();
-
-  // small steam lines for theme
-  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(player.x-6, player.y- player.r -6); ctx.quadraticCurveTo(player.x-6, player.y- player.r -12, player.x-2, player.y- player.r -10); ctx.stroke();
+  // draw player: image if available, otherwise circle placeholder with noodle stroke
+  if(imagesReady && playerImg && playerImg.complete && playerImg.naturalWidth){
+    const imgW = player.r * 4;
+    const imgH = player.r * 4;
+    ctx.drawImage(playerImg, player.x - imgW/2, player.y - imgH/2, imgW, imgH);
+  } else {
+    ctx.fillStyle = clientConfig.theme.playerColor;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.r, 0, Math.PI*2);
+    ctx.fill();
+    // a simple noodle arc
+    ctx.strokeStyle = '#d99a3b';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(player.x - player.r/1.5, player.y - player.r/4);
+    ctx.quadraticCurveTo(player.x, player.y - player.r, player.x + player.r/1.5, player.y - player.r/6);
+    ctx.stroke();
+    // small steam lines for theme
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(player.x-6, player.y- player.r -6); ctx.quadraticCurveTo(player.x-6, player.y- player.r -12, player.x-2, player.y- player.r -10); ctx.stroke();
+  }
 }
 
 function jump(){
