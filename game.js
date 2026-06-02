@@ -58,6 +58,7 @@ function q(id){ return document.getElementById(id); }
 function initGame(){
   canvas = q('gameCanvas');
   ctx = canvas.getContext('2d');
+  console.log('Canvas initialized:', canvas);
   el.time = q('time');
   el.reward = q('reward');
   el.next = q('next');
@@ -107,6 +108,8 @@ function loadImages(){
   imagesReady = false;
   bgImg = new Image();
   playerImg = new Image();
+  obstacleTopImg = new Image();
+  obstacleBottomImg = new Image();
   let toLoad = 4;
   const checkLoaded = ()=>{ if(--toLoad <= 0) imagesReady = true; };
 
@@ -258,6 +261,9 @@ function updateGame(dt){
 function drawGame(){
   // clear
   ctx.clearRect(0,0,cw,ch);
+  // DEBUG: log first frame to verify drawing is happening
+  if(!window.drawCount) { window.drawCount = 0; console.log('Drawing frame:', window.drawCount, 'Canvas size:', cw, 'x', ch, 'imagesReady:', imagesReady); }
+  window.drawCount++;
   // background: image if available, otherwise solid color
   if(imagesReady && bgImg && bgImg.complete && bgImg.naturalWidth){
     // draw background to cover canvas while preserving aspect
