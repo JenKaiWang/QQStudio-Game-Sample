@@ -107,9 +107,19 @@ function loadImages(){
   const checkLoaded = ()=>{ if(--toLoad <= 0) imagesReady = true; };
 
   // Try to load background and player. If not found, images will error but game will still run.
-  bgImg.src = 'assets/bg.jpg';
   bgImg.onload = checkLoaded;
-  bgImg.onerror = ()=>{ console.info('bg image not found at assets/bg.jpg — using placeholder'); checkLoaded(); };
+  // try primary name, then fallback to bp.png if available
+  let bgTriedAlternate = false;
+  bgImg.onerror = ()=>{
+    if(!bgTriedAlternate){
+      bgTriedAlternate = true;
+      bgImg.src = 'assets/bp.png';
+    } else {
+      console.info('bg image not found at assets/bg.jpg or assets/bp.png — using placeholder');
+      checkLoaded();
+    }
+  };
+  bgImg.src = 'assets/bg.jpg';
 
   playerImg.src = 'assets/player.png';
   playerImg.onload = checkLoaded;
