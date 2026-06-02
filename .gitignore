@@ -1,0 +1,10 @@
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore editor files
+.vscode/
+
+# Ignore build artifacts
+/dist
+/build
