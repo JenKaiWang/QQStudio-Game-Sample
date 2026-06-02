@@ -45,7 +45,25 @@ python -m http.server 8000
 
 Asset filenames expected (place in project root `assets/`):
 
-- `assets/bg.jpg`  — background ramen shop image (suggested: provided attachment)
+- `assets/bp.jpg`  — background ramen shop image (suggested: provided attachment)
 - `assets/player.png` — ramen bowl character (suggested: provided attachment)
 
 After adding images, reload the page. The game will use the images automatically and fall back to placeholders if images are missing.
+
+## Asset Processing (v2 - Updated)
+
+- Date: 2026-06-02
+- Added `process-assets.html` — Use this utility to process your images:
+  1. Remove white background from player.png to make it transparent
+  2. Split obstacle.png into obstacle-top.png and obstacle-bottom.png (for top/bottom pipe-like obstacles)
+  
+How to use:
+1. Open `process-assets.html` in your browser
+2. For player: Select player.png → Click "Process Player" → Download result → Save to `assets/player.png`
+3. For obstacle: Select obstacle.png → Click "Split Obstacle" → Download both files → Save to `assets/obstacle-top.png` and `assets/obstacle-bottom.png`
+4. Refresh the game page. New assets will load automatically.
+
+Updated game code:
+- Obstacle images now render instead of rectangles
+- Player image loads with transparent background support
+- Images fall back to placeholders if files not found

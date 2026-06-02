@@ -29,6 +29,10 @@ let bgImg = null;
 let playerImg = null;
 let imagesReady = false;
 
+// Obstacle images
+let obstacleTopImg = null;
+let obstacleBottomImg = null;
+
 // Game state
 const STATE = { START: 'start', PLAYING: 'playing', GAMEOVER: 'gameOver', COUPON: 'coupon' };
 let gameState = STATE.START;
@@ -103,7 +107,7 @@ function loadImages(){
   imagesReady = false;
   bgImg = new Image();
   playerImg = new Image();
-  let toLoad = 2;
+  let toLoad = 4;
   const checkLoaded = ()=>{ if(--toLoad <= 0) imagesReady = true; };
 
   // Try to load background and player. If not found, images will error but game will still run.
@@ -124,6 +128,14 @@ function loadImages(){
   playerImg.src = 'assets/player.png';
   playerImg.onload = checkLoaded;
   playerImg.onerror = ()=>{ console.info('player image not found at assets/player.png — using placeholder'); checkLoaded(); };
+
+  obstacleTopImg.onload = checkLoaded;
+  obstacleTopImg.onerror = ()=>{ console.info('obstacle-top.png not found — using placeholder'); checkLoaded(); };
+  obstacleTopImg.src = 'assets/obstacle-top.png';
+
+  obstacleBottomImg.onload = checkLoaded;
+  obstacleBottomImg.onerror = ()=>{ console.info('obstacle-bottom.png not found — using placeholder'); checkLoaded(); };
+  obstacleBottomImg.src = 'assets/obstacle-bottom.png';
 }
 
 function resizeCanvas(){
@@ -264,11 +276,21 @@ function drawGame(){
   ctx.fillStyle = '#e6c8b0';
   ctx.fillRect(0,ch-24,cw,24);
 
-  // draw obstacles
-  ctx.fillStyle = clientConfig.theme.obstacleColor;
+  // draw obstacles: use images if available, otherwise rectangles
   for(const ob of obstacles){
-    ctx.fillRect(ob.x, 0, ob.width, ob.topHeight);
-    ctx.fillRect(ob.x, ob.topHeight + ob.gap, ob.width, ch - (ob.topHeight + ob.gap) - 24);
+    if(imagesReady && obstacleTopImg && obstacleTopImg.complete && obstacleTopImg.naturalWidth){
+      // draw top obstacle image
+      ctx.drawImage(obstacleTopImg, ob.x, 0, ob.width, ob.topHeight);
+      // draw bottom obstacle image (flipped)
+      const bottomY = ob.topHeight + ob.gap;
+      const bottomH = ch - bottomY - 24;
+      ctx.drawImage(obstacleBottomImg, ob.x, bottomY, ob.width, bottomH);
+    } else {
+      // fallback to rectangles
+      ctx.fillStyle = clientConfig.theme.obstacleColor;
+      ctx.fillRect(ob.x, 0, ob.width, ob.topHeight);
+      ctx.fillRect(ob.x, ob.topHeight + ob.gap, ob.width, ch - (ob.topHeight + ob.gap) - 24);
+    }
   }
 
   // draw player: image if available, otherwise circle placeholder with noodle stroke

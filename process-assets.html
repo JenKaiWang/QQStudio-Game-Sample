@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ramen Dash - Asset Processor</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { color: #d94f30; }
+    .section { background: white; padding: 15px; margin: 15px 0; border-radius: 8px; }
+    button { background: #d94f30; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 16px; }
+    button:hover { background: #b83d20; }
+    input[type="file"] { margin: 10px 0; }
+    canvas { border: 1px solid #ccc; margin: 10px 0; max-width: 100%; }
+    .info { background: #e8f4f8; padding: 10px; border-left: 4px solid #0088cc; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Ramen Dash - Asset Processor</h1>
+  <p>Use this tool to prepare your game assets.</p>
+
+  <div class="section">
+    <h2>1. Make Player Transparent</h2>
+    <div class="info">Removes the white/light background from player.png, keeping only the ramen bowl character.</div>
+    <input type="file" id="playerInput" accept="image/*" />
+    <button onclick="processPlayer()">Process Player (Remove White Background)</button>
+    <br />
+    <canvas id="playerCanvas"></canvas>
+    <button onclick="downloadCanvas('playerCanvas', 'player.png')" id="downloadPlayerBtn" style="display:none;">Download player.png</button>
+  </div>
+
+  <div class="section">
+    <h2>2. Split Obstacle Image</h2>
+    <div class="info">Splits a combined obstacle image into top and bottom halves for top/bottom pipe-like obstacles.</div>
+    <input type="file" id="obstacleInput" accept="image/*" />
+    <button onclick="processObstacle()">Split Obstacle Image</button>
+    <br />
+    <div>
+      <h4>Top Half (obstacle-top.png):</h4>
+      <canvas id="obstacleTopCanvas"></canvas>
+      <button onclick="downloadCanvas('obstacleTopCanvas', 'obstacle-top.png')" id="downloadTopBtn" style="display:none;">Download obstacle-top.png</button>
+    </div>
+    <div>
+      <h4>Bottom Half (obstacle-bottom.png):</h4>
+      <canvas id="obstacleBottomCanvas"></canvas>
+      <button onclick="downloadCanvas('obstacleBottomCanvas', 'obstacle-bottom.png')" id="downloadBottomBtn" style="display:none;">Download obstacle-bottom.png</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Instructions:</h3>
+    <ol>
+      <li>For <strong>Player</strong>: Select player.png → Click "Process Player" → Download the result and save to <code>assets/player.png</code></li>
+      <li>For <strong>Obstacle</strong>: Select obstacle.png → Click "Split Obstacle" → Download both images to <code>assets/obstacle-top.png</code> and <code>assets/obstacle-bottom.png</code></li>
+      <li>Refresh your game page. New assets will load automatically.</li>
+    </ol>
+  </div>
+
+  <script>
+    function processPlayer() {
+      const input = document.getElementById('playerInput');
+      if (!input.files[0]) { alert('Please select player.png'); return; }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.getElementById('playerCanvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          
+          // Remove white background: convert near-white pixels to transparent
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+          
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i+1];
+            const b = data[i+2];
+            const a = data[i+3];
+            
+            // If pixel is very light (close to white), make it transparent
+            const brightness = (r + g + b) / 3;
+            if (brightness > 240 && a > 200) {
+              data[i+3] = 0; // set alpha to transparent
+            }
+          }
+          ctx.putImageData(imageData, 0, 0);
+          document.getElementById('downloadPlayerBtn').style.display = 'inline-block';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    function processObstacle() {
+      const input = document.getElementById('obstacleInput');
+      if (!input.files[0]) { alert('Please select obstacle.png'); return; }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const origWidth = img.width;
+          const origHeight = img.height;
+          
+          // Top half
+          const canvasTop = document.getElementById('obstacleTopCanvas');
+          canvasTop.width = origWidth;
+          canvasTop.height = Math.floor(origHeight / 2);
+          const ctxTop = canvasTop.getContext('2d');
+          ctxTop.drawImage(img, 0, 0, origWidth, origHeight / 2, 0, 0, origWidth, origHeight / 2);
+          
+          // Bottom half (flipped)
+          const canvasBot = document.getElementById('obstacleBottomCanvas');
+          canvasBot.width = origWidth;
+          canvasBot.height = Math.floor(origHeight / 2);
+          const ctxBot = canvasBot.getContext('2d');
+          ctxBot.scale(1, -1);
+          ctxBot.drawImage(img, 0, origHeight / 2, origWidth, origHeight / 2, 0, -origHeight / 2, origWidth, origHeight / 2);
+          
+          document.getElementById('downloadTopBtn').style.display = 'inline-block';
+          document.getElementById('downloadBottomBtn').style.display = 'inline-block';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    function downloadCanvas(canvasId, filename) {
+      const canvas = document.getElementById(canvasId);
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = filename;
+      link.click();
+    }
+  </script>
+</body>
+</html>
