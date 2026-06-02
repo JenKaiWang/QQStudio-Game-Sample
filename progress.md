@@ -68,7 +68,15 @@ Updated game code:
 - Player image loads with transparent background support
 - Images fall back to placeholders if files not found
 
-## Obstacle Rendering Fix (v3 - Current)
+## Obstacle Size Fix (v4 - Current)
+
+- Date: 2026-06-02
+- **Increased obstacle width** from 70px to 120px for mobile visibility
+- **Fixed obstacle rendering** to fill from screen edge to gap (like Flappy Bird)
+  - Top obstacle: extends from top of screen (y=0) down to gap start
+  - Bottom obstacle: extends from gap end up to ground
+- **Updated collision detection** to match actual drawn obstacle dimensions
+- **Preserved aspect ratio** while ensuring obstacles are large enough to see
 
 - Date: 2026-06-02
 - **Fixed obstacle distortion**: Obstacles now use proper aspect ratio scaling instead of stretching

@@ -289,20 +289,24 @@ function drawGame(){
       const topAspect = obstacleTopImg.naturalHeight / obstacleTopImg.naturalWidth;
       const bottomAspect = obstacleBottomImg.naturalHeight / obstacleBottomImg.naturalWidth;
       
-      const drawnTopHeight = Math.round(ob.width * topAspect);
-      const drawnBottomHeight = Math.round(ob.width * bottomAspect);
+      // Scale height based on aspect ratio, but ensure minimum visibility
+      const minHeight = Math.round(ob.width * 0.6); // minimum 60% of width
+      const drawnTopHeight = Math.max(minHeight, Math.round(ob.width * topAspect));
+      const drawnBottomHeight = Math.max(minHeight, Math.round(ob.width * bottomAspect));
       
       // Store for collision detection
       ob.drawnTopHeight = drawnTopHeight;
       ob.drawnBottomHeight = drawnBottomHeight;
       
-      // Draw top obstacle: positioned to hang down from the gap start
-      const topObstacleY = Math.max(0, ob.topGapStart - drawnTopHeight);
-      ctx.drawImage(obstacleTopImg, ob.x, topObstacleY, ob.width, drawnTopHeight);
+      // Draw top obstacle: extend from top of screen down to the gap
+      // Position at y=0 and fill height down to topGapStart
+      const topDrawHeight = ob.topGapStart;
+      ctx.drawImage(obstacleTopImg, ob.x, 0, ob.width, topDrawHeight);
       
-      // Draw bottom obstacle: positioned to rise up from the gap start + gap
-      const bottomObstacleY = ob.topGapStart + ob.gap;
-      ctx.drawImage(obstacleBottomImg, ob.x, bottomObstacleY, ob.width, drawnBottomHeight);
+      // Draw bottom obstacle: extend from gap up to ground
+      const bottomStartY = ob.topGapStart + ob.gap;
+      const bottomDrawHeight = ch - bottomStartY - 24; // leave room for ground
+      ctx.drawImage(obstacleBottomImg, ob.x, bottomStartY, ob.width, bottomDrawHeight);
     } else {
       // fallback to simple rectangles if images not loaded
       ctx.fillStyle = clientConfig.theme.obstacleColor;
@@ -342,8 +346,8 @@ function jump(){
 }
 
 function spawnObstacle(){
-  // Fixed width for obstacles (in pixels)
-  const obstacleWidth = 70;
+  // Fixed width for obstacles (in pixels) - scaled for mobile visibility
+  const obstacleWidth = 120;
   const minGap = Math.max(90, Math.round(160 - elapsedTime*1.2));
   const maxGap = Math.max(minGap, minGap + 40);
   const gap = Math.round(minGap + Math.random()*(maxGap-minGap));
@@ -368,9 +372,9 @@ function checkCollision(circle, rect){
   // check collision with top and bottom obstacles using actual drawn dimensions
   const rects = [
     // top obstacle: from y=0 down to topGapStart (where gap starts)
-    { x: rect.x, y: Math.max(0, rect.topGapStart - rect.drawnTopHeight), w: rect.width, h: Math.max(0, rect.topGapStart) },
-    // bottom obstacle: from (topGapStart + gap) down to ground
-    { x: rect.x, y: rect.topGapStart + rect.gap, w: rect.width, h: rect.drawnBottomHeight }
+    { x: rect.x, y: 0, w: rect.width, h: rect.topGapStart },
+    // bottom obstacle: from (topGapStart + gap) down to ground (ch - 24)
+    { x: rect.x, y: rect.topGapStart + rect.gap, w: rect.width, h: ch - (rect.topGapStart + rect.gap) - 24 }
   ];
   for(const r of rects){
     const closestX = clamp(circle.x, r.x, r.x + r.w);
