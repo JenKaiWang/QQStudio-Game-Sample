@@ -24,10 +24,14 @@ let canvas, ctx;
 let cw = 360, ch = 640; // default portrait area (will be resized)
 let DPR = window.devicePixelRatio || 1;
 
-// Images (optional): place images at `assets/bg.jpg` and `assets/player.png`
+// Images (optional): place background at `assets/bg.jpg` or `assets/bp.png`.
 let bgImg = null;
-let playerImg = null;
+let playerOpenImg = null;
+let playerClosedImg = null;
 let imagesReady = false;
+let playerFrame = 'open';
+let playerFrameTimer = null;
+const playerClosedDuration = 125;
 
 // Game state
 const STATE = { START: 'start', PLAYING: 'playing', GAMEOVER: 'gameOver', COUPON: 'coupon' };
@@ -103,11 +107,12 @@ function initGame(){
 function loadImages(){
   imagesReady = false;
   bgImg = new Image();
-  playerImg = new Image();
-  let toLoad = 2;
+  playerOpenImg = new Image();
+  playerClosedImg = new Image();
+  let toLoad = 3;
   const checkLoaded = ()=>{ if(--toLoad <= 0) imagesReady = true; };
 
-  // Try to load background and player. If not found, images will error but game will still run.
+  // Try to load background and character frames. If not found, the game will still run.
   bgImg.onload = checkLoaded;
   // try primary name, then fallback to bp.png if available
   let bgTriedAlternate = false;
@@ -122,9 +127,13 @@ function loadImages(){
   };
   bgImg.src = 'assets/bg.jpg';
 
-  playerImg.src = 'assets/player.png';
-  playerImg.onload = checkLoaded;
-  playerImg.onerror = ()=>{ console.info('player image not found at assets/player.png — using placeholder'); checkLoaded(); };
+  playerOpenImg.onload = checkLoaded;
+  playerOpenImg.onerror = ()=>{ console.info('open character image not found at assets/character_open.png - using placeholder'); checkLoaded(); };
+  playerOpenImg.src = 'assets/character_open.png';
+
+  playerClosedImg.onload = checkLoaded;
+  playerClosedImg.onerror = ()=>{ console.info('closed character image not found at assets/character_close.png - using open frame or placeholder'); checkLoaded(); };
+  playerClosedImg.src = 'assets/character_close.png';
 }
 
 function getObstacleRects(ob){
@@ -189,6 +198,7 @@ function startGame(){
   // initialize gameplay
   document.body.classList.add('playing');
   gameState = STATE.PLAYING;
+  resetPlayerFrame();
   player.y = ch/2;
   player.vy = 0;
   obstacles = [];
@@ -289,10 +299,11 @@ function drawGame(){
   }
 
   // draw player: image if available, otherwise circle placeholder with noodle stroke
-  if(imagesReady && playerImg && playerImg.complete && playerImg.naturalWidth){
+  const playerSprite = getPlayerSprite();
+  if(imagesReady && playerSprite){
     const imgW = player.r * 4;
     const imgH = player.r * 4;
-    ctx.drawImage(playerImg, player.x - imgW/2, player.y - imgH/2, imgW, imgH);
+    ctx.drawImage(playerSprite, player.x - imgW/2, player.y - imgH/2, imgW, imgH);
   } else {
     ctx.fillStyle = clientConfig.theme.playerColor;
     ctx.beginPath();
@@ -314,6 +325,32 @@ function drawGame(){
 
 function jump(){
   player.vy = jumpVelocity;
+  showClosedPlayerFrame();
+}
+
+function getPlayerSprite(){
+  const closedReady = playerClosedImg && playerClosedImg.complete && playerClosedImg.naturalWidth;
+  const openReady = playerOpenImg && playerOpenImg.complete && playerOpenImg.naturalWidth;
+  if(playerFrame === 'closed' && closedReady) return playerClosedImg;
+  if(openReady) return playerOpenImg;
+  return null;
+}
+
+function showClosedPlayerFrame(){
+  playerFrame = 'closed';
+  if(playerFrameTimer) clearTimeout(playerFrameTimer);
+  playerFrameTimer = setTimeout(()=>{
+    playerFrame = 'open';
+    playerFrameTimer = null;
+  }, playerClosedDuration);
+}
+
+function resetPlayerFrame(){
+  playerFrame = 'open';
+  if(playerFrameTimer){
+    clearTimeout(playerFrameTimer);
+    playerFrameTimer = null;
+  }
 }
 
 function drawObstacleRect(x, y, width, height){
@@ -438,6 +475,7 @@ function hideCouponModal(){
 function resetGame(){
   // fully reset to start state
   gameState = STATE.START;
+  resetPlayerFrame();
   el.startScreen.classList.remove('hidden');
   el.gameOverScreen.classList.add('hidden');
   el.couponModal.classList.add('hidden');

@@ -36,6 +36,21 @@ Use this file to store the game development status, current implementation detai
 - [x] Adjusted obstacle width to be slimmer for mobile readability
 - [x] Committed and pushed `game.js` updates to GitHub
 
+## Character animation update
+
+- Date: 2026-06-04
+- Files added / updated:
+  - `game.js`: added simple 2-frame character sprite swapping on jump input
+  - `assets/character_open.png`: default idle character frame
+  - `assets/character_close.png`: brief jump animation frame
+
+- Current implementation:
+  - The player uses `assets/character_open.png` while idle
+  - Tap / click / Space jump input briefly switches the player to `assets/character_close.png`
+  - The closed frame stays visible for about 125ms, then returns to the open frame
+  - Player size, player position, gravity, controls, timer, coupons, and obstacle logic remain unchanged
+  - The animation uses whole-sprite image swapping only, with no separated eye or chopstick layers
+
 ## How to run locally
 
 You can open `index.html` directly in a browser, but using a local HTTP server is recommended.
@@ -50,7 +65,7 @@ python -m http.server 8000
 ## Notes
 
 - `assets/` may contain optional image files, but the current obstacle rendering does not depend on `obstacle-top.png` or `obstacle-bottom.png`.
-- The current game still supports `assets/player.png` if present.
+- The current game uses `assets/character_open.png` and `assets/character_close.png` for the player character animation.
 - `process-assets.html` exists in the repository, but the obstacle image pipeline is not required for the current playable version.
 
 ## Next steps
