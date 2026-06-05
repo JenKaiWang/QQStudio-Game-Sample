@@ -51,6 +51,24 @@ Use this file to store the game development status, current implementation detai
   - Player size, player position, gravity, controls, timer, coupons, and obstacle logic remain unchanged
   - The animation uses whole-sprite image swapping only, with no separated eye or chopstick layers
 
+## Time UI and background music update
+
+- Date: 2026-06-05
+- Files added / updated:
+  - `index.html`: replaced the plain time text with a progress bar structure
+  - `style.css`: added responsive ramen-themed styling for the time progress bar
+  - `game.js`: updates time text and progress fill every frame, capped at 60 seconds
+  - `assets/bgm.mp3`: added background music for gameplay
+
+- Current implementation:
+  - The Time HUD now displays a horizontal progress bar that fills from 0 to 60 seconds
+  - Time progress uses `Math.min(currentTime / 60, 1)` so the bar never exceeds 100%
+  - The time text remains readable on top of the warm orange progress fill
+  - Background music starts only after the user starts the game
+  - Music loops during gameplay at low volume (`0.3`)
+  - Music pauses on Game Over and resets when the player returns to the start/play-again flow
+  - Gameplay, player movement, obstacles, timer calculation, coupon logic, layout, and character animation remain unchanged
+
 ## How to run locally
 
 You can open `index.html` directly in a browser, but using a local HTTP server is recommended.

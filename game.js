@@ -33,6 +33,9 @@ let playerFrame = 'open';
 let playerFrameTimer = null;
 const playerClosedDuration = 125;
 
+// Background music starts only from user-triggered game starts.
+let bgMusic = null;
+
 // Game state
 const STATE = { START: 'start', PLAYING: 'playing', GAMEOVER: 'gameOver', COUPON: 'coupon' };
 let gameState = STATE.START;
@@ -60,6 +63,8 @@ function initGame(){
   ctx = canvas.getContext('2d');
   console.log('Canvas initialized:', canvas);
   el.time = q('time');
+  el.timeFill = q('timeFill');
+  el.timeText = q('timeText');
   el.reward = q('reward');
   el.next = q('next');
   el.startScreen = q('startScreen');
@@ -93,10 +98,12 @@ function initGame(){
 
   // start loading images (if present)
   loadImages();
+  initAudio();
 
   // Show start content from config
   q('title').textContent = clientConfig.gameTitle;
   q('subtitle').textContent = clientConfig.subtitle;
+  updateTimeUI(0);
   updateNextReward(0);
 
   // Start animation loop but only update when playing
@@ -134,6 +141,33 @@ function loadImages(){
   playerClosedImg.onload = checkLoaded;
   playerClosedImg.onerror = ()=>{ console.info('closed character image not found at assets/character_close.png - using open frame or placeholder'); checkLoaded(); };
   playerClosedImg.src = 'assets/character_close.png';
+}
+
+function initAudio(){
+  bgMusic = new Audio('assets/bgm.mp3');
+  bgMusic.loop = true;
+  bgMusic.volume = 0.3;
+  bgMusic.preload = 'auto';
+}
+
+function playBackgroundMusic(){
+  if(!bgMusic) return;
+  bgMusic.currentTime = 0;
+  const playPromise = bgMusic.play();
+  if(playPromise && typeof playPromise.catch === 'function'){
+    playPromise.catch(()=>{});
+  }
+}
+
+function pauseBackgroundMusic(){
+  if(!bgMusic) return;
+  bgMusic.pause();
+}
+
+function resetBackgroundMusic(){
+  if(!bgMusic) return;
+  bgMusic.pause();
+  bgMusic.currentTime = 0;
 }
 
 function getObstacleRects(ob){
@@ -209,6 +243,7 @@ function startGame(){
   el.startScreen.classList.add('hidden');
   el.gameOverScreen.classList.add('hidden');
   el.couponModal.classList.add('hidden');
+  playBackgroundMusic();
 }
 
 function loop(now){
@@ -258,7 +293,7 @@ function updateGame(dt){
   }
 
   // update UI
-  el.time.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
+  updateTimeUI(elapsedTime);
   const curr = getCurrentCoupon(elapsedTime);
   el.reward.textContent = `Current Reward: ${curr ? curr.reward : 'None'}`;
   const next = getNextCoupon(elapsedTime);
@@ -428,6 +463,7 @@ function endGame(){
   if(gameState !== STATE.PLAYING) return;
   gameState = STATE.GAMEOVER;
   document.body.classList.remove('playing');
+  pauseBackgroundMusic();
   const finalTime = elapsedTime;
   el.survivedText.textContent = `You survived: ${finalTime.toFixed(1)}s`;
   const coupon = getCurrentCoupon(finalTime);
@@ -456,6 +492,12 @@ function updateNextReward(t){
   el.next.textContent = next ? `Next: ${next.reward} at ${next.time}s` : 'Next: —';
 }
 
+function updateTimeUI(t){
+  const progress = Math.min(t / 60, 1);
+  el.timeText.textContent = `Time: ${t.toFixed(1)}s`;
+  el.timeFill.style.width = `${progress * 100}%`;
+}
+
 function showCouponScreen(){
   const coupon = getCurrentCoupon(elapsedTime);
   if(!coupon){
@@ -475,6 +517,7 @@ function hideCouponModal(){
 function resetGame(){
   // fully reset to start state
   gameState = STATE.START;
+  resetBackgroundMusic();
   resetPlayerFrame();
   el.startScreen.classList.remove('hidden');
   el.gameOverScreen.classList.add('hidden');
@@ -482,7 +525,7 @@ function resetGame(){
   obstacles = [];
   player.y = ch/2; player.vy = 0;
   elapsedTime = 0;
-  el.time.textContent = 'Time: 0.0s';
+  updateTimeUI(0);
   el.reward.textContent = 'Current Reward: None';
   updateNextReward(0);
 }

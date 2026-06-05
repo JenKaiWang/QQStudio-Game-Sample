@@ -11,7 +11,10 @@
     <canvas id="gameCanvas" aria-label="Ramen Dash game canvas"></canvas>
 
     <div id="top-ui">
-      <div id="time">Time: 0.0s</div>
+      <div id="time" class="time-meter" aria-label="Survival time progress">
+        <div id="timeFill"></div>
+        <span id="timeText">Time: 0.0s</span>
+      </div>
       <div id="reward">Current Reward: None</div>
       <div id="next">Next: Free appetizer at 10s</div>
     </div>

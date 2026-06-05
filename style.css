@@ -44,8 +44,9 @@ canvas{
 #top-ui{
   position:absolute;
   top:12px;
-  left:12px;
-  right:12px;
+  left:50%;
+  width:min(420px, calc(100vw - 24px));
+  transform:translateX(-50%);
   display:flex;
   flex-direction:column;
   gap:6px;
@@ -64,6 +65,34 @@ canvas{
   line-height:1.25;
   box-shadow:0 3px 10px rgba(58,32,16,0.12);
   text-shadow:0 1px 0 rgba(255,255,255,0.8);
+}
+#time.time-meter{
+  position:relative;
+  width:100%;
+  min-height:30px;
+  overflow:hidden;
+  padding:0;
+  background:rgba(255,248,235,0.92);
+  border-color:rgba(159,50,28,0.28);
+}
+#timeFill{
+  position:absolute;
+  inset:0 auto 0 0;
+  width:0%;
+  border-radius:7px;
+  background:linear-gradient(90deg, #ffbf5f 0%, #f47732 58%, #d94f30 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,0.38), 0 0 10px rgba(217,79,48,0.25);
+  transition:width 120ms linear;
+}
+#timeText{
+  position:relative;
+  z-index:1;
+  display:block;
+  padding:7px 11px;
+  color:#1f120c;
+  font-weight:800;
+  line-height:1.25;
+  text-shadow:0 1px 0 rgba(255,250,238,0.85);
 }
 .overlay{
   position:absolute;
