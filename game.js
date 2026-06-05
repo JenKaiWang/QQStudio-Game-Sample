@@ -36,6 +36,9 @@ const playerClosedDuration = 125;
 // Background music starts only from user-triggered game starts.
 let bgMusic = null;
 
+let unlockedPrizeTimes = new Set();
+let prizeNotificationTimer = null;
+
 // Game state
 const STATE = { START: 'start', PLAYING: 'playing', GAMEOVER: 'gameOver', COUPON: 'coupon' };
 let gameState = STATE.START;
@@ -67,6 +70,8 @@ function initGame(){
   el.timeText = q('timeText');
   el.reward = q('reward');
   el.next = q('next');
+  el.prizeNotification = q('prizeNotification');
+  el.prizeNotificationReward = q('prizeNotificationReward');
   el.startScreen = q('startScreen');
   el.startBtn = q('startBtn');
   el.gameOverScreen = q('gameOverScreen');
@@ -233,6 +238,7 @@ function startGame(){
   document.body.classList.add('playing');
   gameState = STATE.PLAYING;
   resetPlayerFrame();
+  resetPrizeNotifications();
   player.y = ch/2;
   player.vy = 0;
   obstacles = [];
@@ -296,6 +302,7 @@ function updateGame(dt){
   updateTimeUI(elapsedTime);
   const curr = getCurrentCoupon(elapsedTime);
   el.reward.textContent = `Current Reward: ${curr ? curr.reward : 'None'}`;
+  checkPrizeNotification(elapsedTime);
   const next = getNextCoupon(elapsedTime);
   el.next.textContent = next ? `Next: ${next.reward} at ${next.time}s` : 'Next: —';
 }
@@ -464,6 +471,7 @@ function endGame(){
   gameState = STATE.GAMEOVER;
   document.body.classList.remove('playing');
   pauseBackgroundMusic();
+  hidePrizeNotification();
   const finalTime = elapsedTime;
   el.survivedText.textContent = `You survived: ${finalTime.toFixed(1)}s`;
   const coupon = getCurrentCoupon(finalTime);
@@ -498,6 +506,35 @@ function updateTimeUI(t){
   el.timeFill.style.width = `${progress * 100}%`;
 }
 
+function checkPrizeNotification(t){
+  for(const coupon of clientConfig.coupons){
+    if(t >= coupon.time && !unlockedPrizeTimes.has(coupon.time)){
+      unlockedPrizeTimes.add(coupon.time);
+      showPrizeNotification(coupon.reward);
+    }
+  }
+}
+
+function showPrizeNotification(reward){
+  el.prizeNotificationReward.textContent = reward;
+  el.prizeNotification.classList.add('show');
+  if(prizeNotificationTimer) clearTimeout(prizeNotificationTimer);
+  prizeNotificationTimer = setTimeout(hidePrizeNotification, 2000);
+}
+
+function hidePrizeNotification(){
+  el.prizeNotification.classList.remove('show');
+  if(prizeNotificationTimer){
+    clearTimeout(prizeNotificationTimer);
+    prizeNotificationTimer = null;
+  }
+}
+
+function resetPrizeNotifications(){
+  unlockedPrizeTimes = new Set();
+  hidePrizeNotification();
+}
+
 function showCouponScreen(){
   const coupon = getCurrentCoupon(elapsedTime);
   if(!coupon){
@@ -519,6 +556,7 @@ function resetGame(){
   gameState = STATE.START;
   resetBackgroundMusic();
   resetPlayerFrame();
+  resetPrizeNotifications();
   el.startScreen.classList.remove('hidden');
   el.gameOverScreen.classList.add('hidden');
   el.couponModal.classList.add('hidden');

@@ -69,6 +69,21 @@ Use this file to store the game development status, current implementation detai
   - Music pauses on Game Over and resets when the player returns to the start/play-again flow
   - Gameplay, player movement, obstacles, timer calculation, coupon logic, layout, and character animation remain unchanged
 
+## Prize notification update
+
+- Date: 2026-06-05
+- Files added / updated:
+  - `index.html`: added a top-center prize notification overlay inside the game container
+  - `style.css`: added a lightweight ramen-themed banner style with fade/slide animation
+  - `game.js`: added one-time reward milestone tracking and auto-hide notification logic
+
+- Current implementation:
+  - A "Prize Unlocked!" banner appears when the player reaches a new coupon milestone
+  - The banner shows the unlocked reward name and disappears automatically after about 2 seconds
+  - Each milestone notification triggers only once per game run
+  - The notification resets when starting a new game and hides on Game Over
+  - Player movement, obstacles, timer system, coupon logic, game over screen, and overall layout remain unchanged
+
 ## How to run locally
 
 You can open `index.html` directly in a browser, but using a local HTTP server is recommended.
