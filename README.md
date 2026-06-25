@@ -1,6 +1,6 @@
-# QQStudio Game Sample - Ramen Dash
+# QQStudio Game Sample - Flappy Ramen
 
-Ramen Dash is a simple mobile-friendly browser game built with HTML, CSS, and vanilla JavaScript. The game uses a ramen restaurant theme where the player controls a cute ramen bowl character and tries to survive as long as possible while avoiding obstacles.
+Flappy Ramen is a simple mobile-friendly browser game built with HTML, CSS, and vanilla JavaScript. The game uses a ramen restaurant theme where the player controls a cute ramen bowl character and tries to survive as long as possible while avoiding obstacles.
 
 The longer the player survives, the better coupon reward they unlock.
 
@@ -86,4 +86,4 @@ When the game ends, the highest unlocked reward is shown. The player can then cl
 
 ## Current Status
 
-Ramen Dash is playable as a browser prototype. Future improvements may include more visual polish, audio effects, better obstacle art, mobile testing, and additional coupon customization.
+Flappy Ramen is playable as a browser prototype. Future improvements may include more visual polish, audio effects, better obstacle art, mobile testing, and additional coupon customization.

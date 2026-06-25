@@ -8,7 +8,7 @@ Use this file to store the game development status, current implementation detai
 - [x] Add sample game files (`index.html`, `style.css`, `game.js`)
 - [x] Connect to GitHub remote repository and push initial commit
 
-## Ramen Dash prototype
+## Flappy Ramen prototype
 
 - Date: 2026-06-02
 - Files added / updated:

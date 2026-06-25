@@ -1,8 +1,8 @@
-// Ramen Dash - vanilla JS prototype
+// Flappy Ramen - vanilla JS prototype
 // Configurable client object for easy reuse
 const clientConfig = {
   clientName: "Ramen House",
-  gameTitle: "Ramen Dash",
+  gameTitle: "Flappy Ramen",
   subtitle: "Survive longer to unlock ramen coupons!",
   coupons: [
     { time: 10, reward: "Free appetizer", code: "RAMEN-APP-2026" },
